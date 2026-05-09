@@ -1,0 +1,32 @@
+stages:
+  - build
+  - test
+  - dockerize
+
+build-loan-api:
+  stage: build
+  image: maven:3.9-eclipse-temurin-17
+  script:
+    - cd loan-api
+    - mvn clean package -DskipTests
+  artifacts:
+    paths:
+      - loan-api/target/*.jar
+
+test-loan-api:
+  stage: test
+  image: maven:3.9-eclipse-temurin-17
+  script:
+    - cd loan-api
+    - mvn test
+
+dockerize-loan-api:
+  stage: dockerize
+  image: docker:24
+  services:
+    - docker:24-dind
+  script:
+    - cd loan-api
+    - docker build -t loan-api:latest .
+  only:
+    - main
