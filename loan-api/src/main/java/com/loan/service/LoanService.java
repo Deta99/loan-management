@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.loan.exception.ResourceNotFoundException;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -25,6 +26,7 @@ public class LoanService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     private static final String LOAN_APPROVED_TOPIC = "loan-approved";
+    @Transactional
     public LoanResponse applyForLoan(Long customerId, LoanRequest request) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
@@ -41,6 +43,7 @@ public class LoanService {
         return mapToResponse(saved);
     }
 
+    @Transactional
     public LoanResponse approveLoan(Long loanId) {
     Loan loan = loanRepository.findById(loanId)
             .orElseThrow(() -> new ResourceNotFoundException("Loan not found with id: " + loanId));
@@ -69,6 +72,7 @@ public class LoanService {
     return mapToResponse(saved);
 }
 
+    @Transactional
     public LoanResponse rejectLoan(Long loanId) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan not found with id: " + loanId));
@@ -84,7 +88,8 @@ public class LoanService {
 
         return mapToResponse(saved);
     }
-
+    
+    @Transactional(readOnly = true)
     public List<LoanResponse> getLoansByCustomer(Long customerId) {
         return loanRepository.findByCustomerId(customerId)
                 .stream()
@@ -92,6 +97,7 @@ public class LoanService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<LoanResponse> getLoansByStatus(String status) {
         return loanRepository.findByStatus(status)
                 .stream()

@@ -11,7 +11,7 @@ import com.loan.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -22,6 +22,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final LoanRepository loanRepository;
 
+    @Transactional
     public PaymentResponse makePayment(Long loanId, PaymentRequest request) {
         Loan loan = loanRepository.findById(loanId)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan not found with id: " + loanId));
@@ -40,7 +41,8 @@ public class PaymentService {
 
         return mapToResponse(saved);
     }
-
+    
+    @Transactional(readOnly = true)
     public List<PaymentResponse> getPaymentsByLoan(Long loanId) {
         if (!loanRepository.existsById(loanId)) {
             throw new ResourceNotFoundException("Loan not found with id: " + loanId);
